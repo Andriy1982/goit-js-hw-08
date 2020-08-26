@@ -1,7 +1,5 @@
 import gallery from "./gallery-items.js";
 
-// console.log(gallery[0].description);
-
 const listRef = document.querySelector(".js-gallery");
 const lighboxRef = document.querySelector(".js-lightbox");
 const btnCloseRef = document.querySelector(
@@ -9,17 +7,7 @@ const btnCloseRef = document.querySelector(
 );
 const imgLighboxRef = document.querySelector(".lightbox__image");
 
-// console.log(btnCloseRef);
-console.log(imgLighboxRef);
-
-// itemRef.append(linkRef, imgRef);
-
-// console.log(itemRef);
-
-// listRef.appendChild(itemRef);
-
 const createCardGallery = (item) => {
-  //   const listRef = document.querySelector(".js-gallery");
   const itemRef = document.createElement("li");
   itemRef.classList.add("gallery__item");
 
@@ -40,35 +28,58 @@ const createCardGallery = (item) => {
 };
 
 const galleryCards = gallery.map((item) => createCardGallery(item));
-
 listRef.append(...galleryCards);
 
-// console.log(listRef);
+listRef.addEventListener("click", onOpenModal);
+btnCloseRef.addEventListener("click", onCloseModal); // imgLighboxRef.src = Очистить ссілку
+lighboxRef.addEventListener("click", (event) => {
+  if (event.target !== imgLighboxRef) {
+    onCloseModal();
+  }
+});
 
-listRef.addEventListener("click", (event) => {
-  console.log(event.target);
-  console.log(event.target.dataset.source);
-  imgLighboxRef.src = event.target.dataset.source;
-  //   console.log(event.currentTarget);
+function onOpenModal(event) {
   event.preventDefault();
-  //   console.dir(event);
-
-  //   console.log(event.target.nodeName);
+  window.addEventListener("keydown", onPress);
   if (event.target.nodeName !== "IMG") {
     return;
   }
   lighboxRef.classList.add("is-open");
-});
+  addImageOnModal(event);
+}
+function addImageOnModal(event) {
+  imgLighboxRef.src = event.target.dataset.source;
+  imgLighboxRef.alt = event.target.alt;
+}
 
-btnCloseRef.addEventListener("click", () => {
+function onCloseModal() {
+  window.removeEventListener("keydown", onPressEscape);
   lighboxRef.classList.remove("is-open");
-  // imgLighboxRef.src = Очистить ссілку
-});
+}
 
-lighboxRef.addEventListener("click", (event) => {
-  console.log(event.target);
-  console.log(event.currentTarget);
-  if (event.target !== imgLighboxRef) {
-    lighboxRef.classList.remove("is-open");
+function onPress(event) {
+  let activeIndex = gallery.findIndex(
+    (el) => el.description === imgLighboxRef.alt
+  );
+  onPressArrowRigh(event, activeIndex);
+  onPressArrowLeft(event, activeIndex);
+  onPressEscape(event);
+}
+
+function onPressArrowRigh(event, activeIndex) {
+  if (event.code === "ArrowRight" && activeIndex < 8) {
+    imgLighboxRef.src = gallery[activeIndex + 1].original;
+    imgLighboxRef.alt = gallery[activeIndex + 1].description;
   }
-});
+}
+function onPressArrowLeft(event, activeIndex) {
+  if (event.code === "ArrowLeft" && activeIndex > 0) {
+    imgLighboxRef.src = gallery[activeIndex - 1].original;
+    imgLighboxRef.alt = gallery[activeIndex - 1].description;
+  }
+}
+function onPressEscape(event) {
+  if (event.code === "Escape") {
+    onCloseModal();
+  }
+}
