@@ -8,18 +8,19 @@ const btnCloseRef = document.querySelector(
 const imgLighboxRef = document.querySelector(".lightbox__image");
 
 const createCardGallery = (item) => {
+  const { original, preview, description } = item;
   const itemRef = document.createElement("li");
   itemRef.classList.add("gallery__item");
 
   const linkRef = document.createElement("a");
   linkRef.classList.add("gallery__link");
-  linkRef.href = item.original;
+  linkRef.href = original;
 
   const imgRef = document.createElement("img");
   imgRef.classList.add("gallery__image");
-  imgRef.src = item.preview;
-  imgRef.alt = item.description;
-  imgRef.dataset.source = item.original;
+  imgRef.src = preview;
+  imgRef.alt = description;
+  imgRef.dataset.source = original;
 
   linkRef.appendChild(imgRef);
   itemRef.appendChild(linkRef);
@@ -31,7 +32,7 @@ const galleryCards = gallery.map((item) => createCardGallery(item));
 listRef.append(...galleryCards);
 
 listRef.addEventListener("click", onOpenModal);
-btnCloseRef.addEventListener("click", onCloseModal); // imgLighboxRef.src = Очистить ссілку
+btnCloseRef.addEventListener("click", onCloseModal);
 lighboxRef.addEventListener("click", (event) => {
   if (event.target !== imgLighboxRef) {
     onCloseModal();
@@ -39,47 +40,51 @@ lighboxRef.addEventListener("click", (event) => {
 });
 
 function onOpenModal(event) {
+  const { target } = event;
   event.preventDefault();
   window.addEventListener("keydown", onPress);
-  if (event.target.nodeName !== "IMG") {
+  if (target.nodeName !== "IMG") {
     return;
   }
   lighboxRef.classList.add("is-open");
   addImageOnModal(event);
 }
 function addImageOnModal(event) {
-  imgLighboxRef.src = event.target.dataset.source;
-  imgLighboxRef.alt = event.target.alt;
+  const { target } = event;
+  imgLighboxRef.src = target.dataset.source;
+  imgLighboxRef.alt = target.alt;
 }
 
 function onCloseModal() {
-  window.removeEventListener("keydown", onPressEscape);
+  window.removeEventListener("keydown", onPress);
   lighboxRef.classList.remove("is-open");
+  imgLighboxRef.src = "";
 }
 
 function onPress(event) {
+  const { code } = event;
   let activeIndex = gallery.findIndex(
     (el) => el.description === imgLighboxRef.alt
   );
-  onPressArrowRigh(event, activeIndex);
-  onPressArrowLeft(event, activeIndex);
-  onPressEscape(event);
+  onPressArrowRigh(code, activeIndex);
+  onPressArrowLeft(code, activeIndex);
+  onPressEscape(code);
 }
 
-function onPressArrowRigh(event, activeIndex) {
-  if (event.code === "ArrowRight" && activeIndex < 8) {
+function onPressArrowRigh(code, activeIndex) {
+  if (code === "ArrowRight" && activeIndex < 8) {
     imgLighboxRef.src = gallery[activeIndex + 1].original;
     imgLighboxRef.alt = gallery[activeIndex + 1].description;
   }
 }
-function onPressArrowLeft(event, activeIndex) {
-  if (event.code === "ArrowLeft" && activeIndex > 0) {
+function onPressArrowLeft(code, activeIndex) {
+  if (code === "ArrowLeft" && activeIndex > 0) {
     imgLighboxRef.src = gallery[activeIndex - 1].original;
     imgLighboxRef.alt = gallery[activeIndex - 1].description;
   }
 }
-function onPressEscape(event) {
-  if (event.code === "Escape") {
+function onPressEscape(code) {
+  if (code === "Escape") {
     onCloseModal();
   }
 }
